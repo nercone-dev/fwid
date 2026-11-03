@@ -1,3 +1,5 @@
+[[Japanese/日本語](README.ja.md)]
+
 # FWID (FourWord Identifier)
 A novel random identifier generation method with time-series sortability.
 
