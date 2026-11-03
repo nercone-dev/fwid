@@ -40,7 +40,7 @@ class CLI:
         sub = parser.add_subparsers(dest="command", metavar="COMMAND")
         sub.required = True
 
-        gen = sub.add_parser("generate", help="generate FWIDs")
+        gen = sub.add_parser("generate", aliases=("g"), help="generate FWIDs")
         gen.add_argument("-b", "--bits", type=CLI.positive_int, default=None,
                          help="total bit length, a multiple of %d (default: the smallest that fits the timestamp)" % FWID.BITS_ALIGN)
         gen.add_argument("-f", "--format", choices=sorted(CLI.FORMATS), default="standard",
@@ -51,7 +51,7 @@ class CLI:
                          help="ISO 8601 timestamp to embed; naive values are UTC (default: now)")
         gen.set_defaults(run=CLI.generate)
 
-        ins = sub.add_parser("inspect", help="show the contents of FWIDs")
+        ins = sub.add_parser("inspect", aliases=("i"), help="show the contents of FWIDs")
         ins.add_argument("ids", nargs="*", metavar="FWID",
                          help="FWIDs in any text format; read from standard input, one per line, if omitted or '-'")
         ins.set_defaults(run=CLI.inspect)
