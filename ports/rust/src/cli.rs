@@ -1,154 +1,73 @@
+use std::ffi::OsString;
 use std::io::{self, BufRead, Write};
 use std::time::SystemTime;
 
+use clap::{Parser, Subcommand, ValueEnum};
 use fwid::{Format, ISO8601, FWID};
 
-const USAGE: &str = "usage: fwid [-h] COMMAND ...";
+/// Text formats selectable on the command line.
+#[derive(Clone, Copy, ValueEnum)]
+enum TextFormat {
+    Standard,
+    Readable,
+    Compact,
+}
 
-const HELP: &str = "usage: fwid [-h] COMMAND ...
+impl From<TextFormat> for Format {
+    fn from(format: TextFormat) -> Self {
+        match format {
+            TextFormat::Standard => Format::StandardText,
+            TextFormat::Readable => Format::ReadableText,
+            TextFormat::Compact => Format::CompactText,
+        }
+    }
+}
 
-Generate and inspect FWIDs (FourWord Identifiers).
+/// Generate and inspect FWIDs (FourWord Identifiers).
+#[derive(Parser)]
+#[command(name = "fwid", subcommand_required = true, arg_required_else_help = true)]
+struct Arguments {
+    #[command(subcommand)]
+    command: Command,
+}
 
-commands:
-  generate, g   generate FWIDs
-  inspect, i    show the contents of FWIDs
-
-options:
-  -h, --help    show this help message and exit
-
-generate options:
-  -b, --bits BITS       total bit length, a multiple of 32
-                        (default: the smallest that fits the timestamp)
-  -f, --format FORMAT   standard, readable or compact (default: standard)
-  -n, --count COUNT     number of FWIDs to generate (default: 1)
-  -t, --time DATETIME   ISO 8601 timestamp to embed; naive values are UTC
-                        (default: now)
-
-inspect arguments:
-  FWID                  FWIDs in any text format; read from standard input,
-                        one per line, if omitted or '-'
-";
-
+#[derive(Subcommand)]
 enum Command {
-    Help,
+    /// generate FWIDs
+    #[command(visible_alias = "g")]
     Generate {
-        bits: Option<usize>,
-        format: Format,
-        count: usize,
+        /// total bit length, a multiple of 32 (default: the smallest that fits the timestamp)
+        #[arg(short, long, value_parser = clap::value_parser!(u64).range(1..))]
+        bits: Option<u64>,
+        /// text format
+        #[arg(short, long, value_enum, default_value = "standard")]
+        format: TextFormat,
+        /// number of FWIDs to generate
+        #[arg(short = 'n', long, default_value_t = 1, value_parser = clap::value_parser!(u64).range(1..))]
+        count: u64,
+        /// ISO 8601 timestamp to embed; naive values are UTC (default: now)
+        #[arg(short, long, value_parser = parse_time)]
         time: Option<SystemTime>,
     },
+    /// show the contents of FWIDs
+    #[command(visible_alias = "i")]
     Inspect {
+        /// FWIDs in any text format; read from standard input, one per line, if omitted or '-'
         ids: Vec<String>,
     },
+}
+
+fn parse_time(text: &str) -> Result<SystemTime, String> {
+    ISO8601::parse(text).map_err(|_| format!("invalid ISO 8601 datetime: {text:?}"))
 }
 
 pub struct CLI;
 
 impl CLI {
-    fn positive(text: &str) -> Result<usize, String> {
-        match text.parse::<usize>() {
-            Ok(0) => Err("must be 1 or greater".into()),
-            Ok(n) => Ok(n),
-            Err(_) => Err(format!("invalid integer: {text:?}")),
-        }
-    }
-
-    fn format(text: &str) -> Result<Format, String> {
-        match text {
-            "standard" => Ok(Format::StandardText),
-            "readable" => Ok(Format::ReadableText),
-            "compact" => Ok(Format::CompactText),
-            _ => Err(format!(
-                "invalid choice: {text:?} (choose from compact, readable, standard)"
-            )),
-        }
-    }
-
-    /// Splits `-bVALUE`, `--bits=VALUE`, `-b VALUE` and `--bits VALUE`.
-    fn option_value<'a>(
-        arg: &'a str,
-        short: char,
-        long: &str,
-        rest: &mut impl Iterator<Item = &'a String>,
-    ) -> Option<Result<&'a str, String>> {
-        let inline = if let Some(v) = arg.strip_prefix(&format!("--{long}=")) {
-            Some(v)
-        } else if arg.len() > 2 && arg.starts_with(&format!("-{short}")) {
-            Some(&arg[2..])
-        } else {
-            None
-        };
-        if let Some(v) = inline {
-            return Some(Ok(v));
-        }
-        if arg == format!("--{long}") || arg == format!("-{short}") {
-            return Some(
-                rest.next()
-                    .map(String::as_str)
-                    .ok_or_else(|| format!("argument -{short}/--{long}: expected one argument")),
-            );
-        }
-        None
-    }
-
-    fn parse(args: &[String]) -> Result<Command, String> {
-        let mut it = args.iter();
-        let name = match it.next().map(String::as_str) {
-            Some("-h" | "--help") => return Ok(Command::Help),
-            Some(name) => name,
-            None => return Err("the following arguments are required: COMMAND".into()),
-        };
-        match name {
-            "generate" | "g" => {
-                let (mut bits, mut format, mut count, mut time) =
-                    (None, Format::StandardText, 1, None);
-                while let Some(arg) = it.next() {
-                    if arg == "-h" || arg == "--help" {
-                        return Ok(Command::Help);
-                    }
-                    if let Some(v) = Self::option_value(arg, 'b', "bits", &mut it) {
-                        bits = Some(Self::positive(v?).map_err(|e| format!("argument -b/--bits: {e}"))?);
-                    } else if let Some(v) = Self::option_value(arg, 'f', "format", &mut it) {
-                        format = Self::format(v?).map_err(|e| format!("argument -f/--format: {e}"))?;
-                    } else if let Some(v) = Self::option_value(arg, 'n', "count", &mut it) {
-                        count = Self::positive(v?).map_err(|e| format!("argument -n/--count: {e}"))?;
-                    } else if let Some(v) = Self::option_value(arg, 't', "time", &mut it) {
-                        let v = v?;
-                        time = Some(ISO8601::parse(v).map_err(|_| {
-                            format!("argument -t/--time: invalid ISO 8601 datetime: {v:?}")
-                        })?);
-                    } else {
-                        return Err(format!("unrecognized arguments: {arg}"));
-                    }
-                }
-                Ok(Command::Generate { bits, format, count, time })
-            }
-            "inspect" | "i" => {
-                let mut ids = Vec::new();
-                let mut options_done = false;
-                for arg in it {
-                    if !options_done && arg == "--" {
-                        options_done = true;
-                    } else if !options_done && (arg == "-h" || arg == "--help") {
-                        return Ok(Command::Help);
-                    } else if !options_done && arg.len() > 1 && arg.starts_with('-') {
-                        return Err(format!("unrecognized arguments: {arg}"));
-                    } else {
-                        ids.push(arg.clone());
-                    }
-                }
-                Ok(Command::Inspect { ids })
-            }
-            _ => Err(format!(
-                "argument COMMAND: invalid choice: {name:?} (choose from generate, g, inspect, i)"
-            )),
-        }
-    }
-
     fn generate(
         bits: Option<usize>,
         format: Format,
-        count: usize,
+        count: u64,
         time: Option<SystemTime>,
         out: &mut impl Write,
         err: &mut impl Write,
@@ -227,22 +146,28 @@ impl CLI {
 
     /// Runs the CLI with `args` (without the program name); returns the exit status.
     pub fn run(
-        args: &[String],
+        args: impl IntoIterator<Item = OsString>,
         stdin: &mut impl BufRead,
         out: &mut impl Write,
         err: &mut impl Write,
     ) -> i32 {
-        let command = match Self::parse(args) {
-            Ok(command) => command,
-            Err(message) => {
-                let _ = writeln!(err, "{USAGE}\nfwid: error: {message}");
-                return 2;
+        let program = OsString::from("fwid");
+        let parsed = match Arguments::try_parse_from(std::iter::once(program).chain(args)) {
+            Ok(parsed) => parsed,
+            Err(e) => {
+                let status = e.exit_code();
+                let text = e.render().to_string();
+                let _ = if status == 0 { write!(out, "{text}") } else { write!(err, "{text}") };
+                return status;
             }
         };
-        let result = match command {
-            Command::Help => write!(out, "{HELP}").map(|_| 0),
+        let result = match parsed.command {
             Command::Generate { bits, format, count, time } => {
-                Self::generate(bits, format, count, time, out, err)
+                let Ok(bits) = bits.map(usize::try_from).transpose() else {
+                    let _ = writeln!(err, "fwid: bits out of range");
+                    return 2;
+                };
+                Self::generate(bits, format.into(), count, time, out, err)
             }
             Command::Inspect { ids } => Self::inspect(ids, stdin, out, err),
         };
