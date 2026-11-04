@@ -6,7 +6,7 @@ import { Base32Hex, Base62, FWID, FWIDError, FWIDFormat, ISO8601 } from "../src/
 import { CLI } from "../src/cli.js";
 
 const rows = (name) =>
-  readFileSync(new URL(`../../testdata/${name}`, import.meta.url), "utf8")
+  readFileSync(new URL(`../../../testdata/${name}`, import.meta.url), "utf8")
     .split("\n")
     .filter((line) => line !== "" && !line.startsWith("#"))
     .map((line) => line.split("\t"));

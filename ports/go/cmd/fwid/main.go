@@ -4,7 +4,7 @@ package main
 import (
 	"os"
 
-	"github.com/nercone-dev/fwid/go/cli"
+	"github.com/nercone-dev/fwid/ports/go/cli"
 )
 
 func main() {

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	fwid "github.com/nercone-dev/fwid/go"
-	"github.com/nercone-dev/fwid/go/iso8601"
+	fwid "github.com/nercone-dev/fwid/ports/go"
+	"github.com/nercone-dev/fwid/ports/go/iso8601"
 )
 
 const usage = "usage: fwid [-h] COMMAND ..."

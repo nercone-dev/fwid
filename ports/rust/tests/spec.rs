@@ -2,8 +2,8 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use fwid::{Base32Hex, Base62, Error, Format, FWID, ISO8601};
 
-const VECTORS: &str = include_str!("../../testdata/vectors.tsv");
-const INVALID: &str = include_str!("../../testdata/invalid.tsv");
+const VECTORS: &str = include_str!("../../../testdata/vectors.tsv");
+const INVALID: &str = include_str!("../../../testdata/invalid.tsv");
 
 fn rows(data: &str) -> impl Iterator<Item = &str> {
     data.lines().filter(|l| !l.is_empty() && !l.starts_with('#'))

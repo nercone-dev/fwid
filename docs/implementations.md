@@ -5,10 +5,10 @@ FWID is implemented in five languages. All of them follow the same specification
 | Language | Directory | Library | Command |
 |---|---|---|---|
 | Python | `src/fwid` | `from fwid import FWID` | `fwid` |
-| Rust | `rust` | `fwid` crate | `cargo run --release --` |
-| Go | `go` | `github.com/nercone-dev/fwid/go` | `go run ./cmd/fwid` |
-| Swift | `swift` | `FWID` library product | `swift run fwid` |
-| JavaScript | `js` | `import { FWID } from "fwid"` | `node bin/fwid.js` |
+| Rust | `ports/rust` | `fwid` crate | `cargo run --release --` |
+| Go | `ports/go` | `github.com/nercone-dev/fwid/ports/go` | `go run ./cmd/fwid` |
+| Swift | `ports/swift` | `FWID` library product | `swift run fwid` |
+| JavaScript | `ports/js` | `import { FWID } from "fwid"` | `node bin/fwid.js` |
 
 ## Command line
 
@@ -48,8 +48,8 @@ Raw bytes sort in time order for identifiers of equal bit length. Each library e
 Shared test vectors live in `testdata/`. `vectors.tsv` holds raw bytes with their expected Standard, Readable and Compact texts and timestamp; `invalid.tsv` holds texts every parser must reject. The vectors were produced with the Python standard library's `base64.b32hexencode` and plain integer arithmetic, not with any FWID implementation.
 
 ```
-cd rust  && cargo test
-cd go    && go test ./...
-cd swift && swift test
-cd js    && node --test test/
+cd ports/rust  && cargo test
+cd ports/go    && go test ./...
+cd ports/swift && swift test
+cd ports/js    && node --test test/
 ```

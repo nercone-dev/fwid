@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	fwid "github.com/nercone-dev/fwid/go"
-	"github.com/nercone-dev/fwid/go/base32hex"
-	"github.com/nercone-dev/fwid/go/base62"
-	"github.com/nercone-dev/fwid/go/iso8601"
+	fwid "github.com/nercone-dev/fwid/ports/go"
+	"github.com/nercone-dev/fwid/ports/go/base32hex"
+	"github.com/nercone-dev/fwid/ports/go/base62"
+	"github.com/nercone-dev/fwid/ports/go/iso8601"
 )
 
 func rows(t *testing.T, name string) [][]string {
 	t.Helper()
-	data, err := os.ReadFile("../testdata/" + name)
+	data, err := os.ReadFile("../../testdata/" + name)
 	if err != nil {
 		t.Fatal(err)
 	}

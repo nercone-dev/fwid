@@ -5,7 +5,7 @@ import Testing
 
 enum TestData {
     static let directory = URL(fileURLWithPath: #filePath)
-        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         .appendingPathComponent("testdata")
 
     static func rows(_ name: String) throws -> [[String]] {

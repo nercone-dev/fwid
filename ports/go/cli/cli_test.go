@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nercone-dev/fwid/go/cli"
+	"github.com/nercone-dev/fwid/ports/go/cli"
 )
 
 func run(args []string, stdin string) (int, string, string) {

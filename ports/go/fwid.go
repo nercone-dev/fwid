@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nercone-dev/fwid/go/base32hex"
-	"github.com/nercone-dev/fwid/go/base62"
+	"github.com/nercone-dev/fwid/ports/go/base32hex"
+	"github.com/nercone-dev/fwid/ports/go/base62"
 )
 
 // Format is a representation of an FWID.

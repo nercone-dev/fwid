@@ -1,6 +1,6 @@
 # Ports
 
-The reference implementation is the Python package in `src/fwid`. Rust, Go, Swift and JavaScript ports live in `rust`, `go`, `swift` and `js`. User-facing notes are in `docs/implementations.md`; this file records why the ports look the way they do.
+The reference implementation is the Python package in `src/fwid`. Rust, Go, Swift and JavaScript ports live in `ports/rust`, `ports/go`, `ports/swift` and `ports/js`. User-facing notes are in `docs/implementations.md`; this file records why the ports look the way they do.
 
 ## Structure
 
