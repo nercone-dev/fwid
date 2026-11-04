@@ -7,6 +7,9 @@ A novel random identifier generation method with time-series sortability.
 This is a novel method for generating random identifiers.
 It is designed for use cases such as database primary keys.
 
+The length is variable and can be changed as needed.
+As of 2026-11-04, the recommended length is 192 bits.
+
 To minimize the possibility of collisions while preventing overflows, the timestamp is not fixed, but instead occupies a quarter of the total bit length.
 This means that simply increasing the total bit length increases the length of the timestamp, enabling continuous use over a longer period.
 
@@ -20,8 +23,10 @@ It is also a wordplay on the word "Forward".
 FWID is represented as a byte array (big-endian) as follows:
 
 ```
-[ (Total bits / 4) bits of timestamp (UTC, ms elapsed since the epoch 2001-01-01 00:00:00 UTC) ] + [ (Total bits / 4 * 3) bits of CSPRNG (Cryptographically Secure Pseudo-Random Number Generator) ]
+[ (Total bits / 4) bits of timestamp ] + [ (Total bits / 4 * 3) bits of CSPRNG output ]
 ```
+
+The timestamp is the time elapsed in milliseconds since 2001-01-01 00:00:00 UTC.
 
 For example, if the total bit length is 256 bits, the timestamp will be 64 bits and the random part will be 192 bits.
 
@@ -49,11 +54,15 @@ It uses Base62 (`0-9A-Za-z`) as the character set.
 The byte array is interpreted as a big-endian multi-precision integer (arbitrary-precision integer) and converted to Base62.
 It is zero-padded with leading `0`s so that it always produces a fixed-length output for the same bit length.
 
-The length is approximately 76% of the text format.
-For example, for 256 bits, the text format is 56 characters, whereas the compact text fits into 43 characters.
+Compared to the standard text format, the length at 256 bits is approximately 76% (56 characters in the standard text format, 43 characters in the compact format).
 
 Note that since Base62 is not a power of 2, bitwise operations cannot be used, and decoding requires multi-precision integer arithmetic.
 Also, it cannot be used in case-insensitive environments.
+
+## Usage Notes
+
+- There is no ordering guarantee within the same timestamp. That is, if multiple IDs are generated within the same millisecond, their order is random. If ordering within the same millisecond is required, the leading part of the random portion would need to be replaced with a sequence number, but the specification for that is not included in the FWID specification itself.
+- The epoch is fixed at 2001-01-01 00:00:00 UTC, and unlike TSID or Snowflake-style schemes, the lifetime cannot be extended by changing the epoch. Instead, the bit width must be increased.
 
 ## Collision Probability
 IDs with different timestamps will never collide. The following figures represent the worst-case scenario (where all IDs are generated within the same millisecond). Values are approximated with the birthday bound, n ≈ √(2·2^r·p) (50%: n ≈ 1.1774·√2^r), where r is the random part bit width.
