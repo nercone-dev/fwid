@@ -81,7 +81,7 @@ class CLI:
                 continue
             if i > 0:
                 print()
-            ms = FWID.unix_ms(fwid.timestamp)
+            ms = FWID.epoch_ms(fwid.timestamp)
             print(f"Format:     {fmt.value}")
             print(f"Bits:       {fwid.bits} (timestamp {fwid.bits_timestamp}, random {fwid.bits_random})")
             print(f"Timestamp:  {fwid.timestamp.isoformat(timespec='milliseconds')} ({ms} ms)")
@@ -103,4 +103,5 @@ class CLI:
             code = 1
         sys.exit(code)
 
-main = CLI.main
+def main(argv: Optional[Sequence[str]] = None) -> None:
+    CLI.main(argv)

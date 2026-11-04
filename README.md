@@ -20,7 +20,7 @@ It is also a wordplay on the word "Forward".
 FWID is represented as a byte array (big-endian) as follows:
 
 ```
-[ (Total bits / 4) bits of UNIX timestamp (UTC, ms) ] + [ (Total bits / 4 * 3) bits of CSPRNG (Cryptographically Secure Pseudo-Random Number Generator) ]
+[ (Total bits / 4) bits of timestamp (UTC, ms elapsed since the epoch 2001-01-01 00:00:00 UTC) ] + [ (Total bits / 4 * 3) bits of CSPRNG (Cryptographically Secure Pseudo-Random Number Generator) ]
 ```
 
 For example, if the total bit length is 256 bits, the timestamp will be 64 bits and the random part will be 192 bits.
@@ -72,9 +72,9 @@ Each bit length overflows at the following times:
 
 | Bits | Timestamp Bit Width | Maximum Seconds | Overflow Timing (Approximate) |
 |---:|---:|:---|:---|
-| 128 | 32 | 4,294,967 (≈49.7 days) | 1970-02-19 (already overflowed) |
-| 160 | 40 | 1,099,511,627 (≈34.8 years) | 2004-11 (already overflowed) |
-| 192 | 48 | 281,474,976,710 (≈8,920 years) | Year ≈10889 |
+| 128 | 32 | 4,294,967 (≈49.7 days) | 2001-02-19 (already overflowed) |
+| 160 | 40 | 1,099,511,627 (≈34.8 years) | 2035-11 |
+| 192 | 48 | 281,474,976,710 (≈8,920 years) | Year ≈10920 |
 | 256 | 64 | 1.8×10¹⁶ | ≈5.8×10⁸ years from the epoch |
 | 384 | 96 | 7.9×10²⁵ | ≈2.5×10¹⁸ years from the epoch |
 | 512 | 128 | 3.4×10³⁶ | ≈1.1×10²⁸ years from the epoch |
