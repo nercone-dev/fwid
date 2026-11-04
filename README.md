@@ -59,25 +59,25 @@ Also, it cannot be used in case-insensitive environments.
 IDs with different timestamps will never collide. The following figures represent the worst-case scenario (where all IDs are generated within the same millisecond). Values are approximated with the birthday bound, n ≈ √(2·2^r·p) (50%: n ≈ 1.1774·√2^r), where r is the random part bit width.
 
 | Bits | Random Part Bit Width | Number of IDs for Collision Probability 10⁻¹⁸ | Number of IDs for Collision Probability 10⁻⁹ | Number of IDs for Collision Probability 50% |
-|---:|---:|:---|:---|:---|
-| 128 | 96 | 4.0×10⁵ | 1.3×10¹⁰ | 3.3×10¹⁴ |
-| 160 | 120 | 1.6×10⁹ | 5.2×10¹³ | 1.4×10¹⁸ |
-| 192 | 144 | 6.7×10¹² | 2.1×10¹⁷ | 5.6×10²¹ |
-| 256 | 192 | 1.1×10²⁰ | 3.5×10²⁴ | 9.3×10²⁸ |
-| 384 | 288 | 3.2×10³⁴ | 1.0×10³⁹ | 2.6×10⁴³ |
-| 512 | 384 | 8.9×10⁴⁸ | 2.8×10⁵³ | 7.4×10⁵⁷ |
+|-----:|----------------------:|:----------------------------------------------|:---------------------------------------------|:--------------------------------------------|
+|  128 |                    96 | 4.0×10⁵                                       | 1.3×10¹⁰                                     | 3.3×10¹⁴                                    |
+|  160 |                   120 | 1.6×10⁹                                       | 5.2×10¹³                                     | 1.4×10¹⁸                                    |
+|  192 |                   144 | 6.7×10¹²                                      | 2.1×10¹⁷                                     | 5.6×10²¹                                    |
+|  256 |                   192 | 1.1×10²⁰                                      | 3.5×10²⁴                                     | 9.3×10²⁸                                    |
+|  384 |                   288 | 3.2×10³⁴                                      | 1.0×10³⁹                                     | 2.6×10⁴³                                    |
+|  512 |                   384 | 8.9×10⁴⁸                                      | 2.8×10⁵³                                     | 7.4×10⁵⁷                                    |
 
 ## Overflow Timing
 Each bit length overflows at the following times:
 
-| Bits | Timestamp Bit Width | Maximum Seconds | Overflow Timing (Approximate) |
-|---:|---:|:---|:---|
-| 128 | 32 | 4,294,967 (≈49.7 days) | 2001-02-19 (already overflowed) |
-| 160 | 40 | 1,099,511,627 (≈34.8 years) | 2035-11 |
-| 192 | 48 | 281,474,976,710 (≈8,920 years) | Year ≈10920 |
-| 256 | 64 | 1.8×10¹⁶ | ≈5.8×10⁸ years from the epoch |
-| 384 | 96 | 7.9×10²⁵ | ≈2.5×10¹⁸ years from the epoch |
-| 512 | 128 | 3.4×10³⁶ | ≈1.1×10²⁸ years from the epoch |
+| Bits | Timestamp Bit Width | Maximum Seconds                | Overflow Timing (Approximate)                        |
+|-----:|--------------------:|:-------------------------------|:-----------------------------------------------------|
+|  128 |                  32 | 4,294,967         (≈49.7 days) | `2001-02-19T17:02:47.296+00:00` (already overflowed) |
+|  160 |                  40 | 1,099,511,627    (≈34.8 years) | `2035-11-04T19:53:47.776+00:00`                      |
+|  192 |                  48 | 281,474,976,710 (≈8,920 years) | `10920-08-03T05:31:50.656+00:00`                     |
+|  256 |                  64 | 1.8×10¹⁶                       | ≈5.8×10⁸ years from the epoch                        |
+|  384 |                  96 | 7.9×10²⁵                       | ≈2.5×10¹⁸ years from the epoch                       |
+|  512 |                 128 | 3.4×10³⁶                       | ≈1.1×10²⁸ years from the epoch                       |
 
 ## Implementations
 Python (this package, in `src/fwid`), Rust, Go, Swift and JavaScript implementations are included, each with the same command line tool. See [docs/implementations.md](docs/implementations.md).
