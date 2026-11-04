@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use fwid::{Base32Hex, Base62, Error, Format, FWID, ISO8601};
+use fwid::{Base32Crockford, Base32Hex, Base62, Error, Format, FWID, ISO8601};
 
 const VECTORS: &str = include_str!("../../../testdata/vectors.tsv");
 const INVALID: &str = include_str!("../../../testdata/invalid.tsv");
@@ -56,6 +56,19 @@ fn invalid_texts_are_rejected() {
 }
 
 // RFC 4648 section 10, with '=' replaced by 'Z'.
+#[test]
+fn base32_crockford_unpadded_with_aliases() {
+    assert_eq!(Base32Crockford::encode(&[0xff; 4]), "ZZZZZZR");
+    assert_eq!(Base32Crockford::decode("zzzzzzr").unwrap(), vec![0xff; 4]);
+    assert_eq!(
+        Base32Crockford::decode("OILOILO").unwrap(),
+        Base32Crockford::decode("0110110").unwrap()
+    );
+    for text in ["U0000000", "000000", "ZZZZZZZ"] {
+        assert!(Base32Crockford::decode(text).is_err(), "{text:?}");
+    }
+}
+
 #[test]
 fn base32hex_rfc4648_vectors() {
     for (plain, encoded) in [

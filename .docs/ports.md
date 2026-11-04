@@ -4,14 +4,14 @@ The reference implementation is the Python package in `src/fwid`. Rust, Go, Swif
 
 ## Structure
 
-Each port has the same parts, mirroring Python's `helpers/base32hex.py`, `helpers/base62.py`, `lib.py` and `cli.py`:
+Each port has the same parts, mirroring Python's `helpers/base32hex.py`, `helpers/base32crockford.py`, `helpers/base62.py`, `lib.py` and `cli.py`:
 
-- `Base32Hex`, `Base62`: independent, reusable codecs with no FWID-specific behaviour. Base32Hex is usable for any data, Base62 for any byte string whose length is fixed.
+- `Base32Hex`, `Base32Crockford`, `Base62`: independent, reusable codecs with no FWID-specific behaviour. Base32Hex and Base32Crockford are usable for any data, Base62 for any byte string whose length is fixed.
 - `ISO8601`: parse and format of datetimes. Needed by the CLI's `-t` and by `inspect`, but implemented as a general component.
 - `FWID` and a format type: the identifier.
 - `CLI`: argument parsing and output, written against injected input and output streams so tests can drive it without a process.
 
-Go uses one package per component (`base32hex`, `base62`, `iso8601`, `cli`) because package-level functions are its idiom for what Python and Java call static methods.
+Go uses one package per component (`base32hex`, `base32crockford`, `base62`, `iso8601`, `cli`) because package-level functions are its idiom for what Python and Java call static methods.
 
 ## Decisions
 
@@ -35,9 +35,12 @@ Go uses one package per component (`base32hex`, `base62`, `iso8601`, `cli`) beca
 
 **Python output differences.** `inspect` prints years with at least four digits; Python's `datetime` cannot represent years beyond 9999, the ports can (JavaScript and Swift within `Date` range).
 
+**Readable Text uses Crockford Base32.** It was Base32 Hex lowercased. Crockford's alphabet avoids look-alike characters (`0/o`, `1/i/l`), which is what a text meant for humans needs. Crockford defines no padding, and `z` is a digit in it, so the old `z` padding cannot be kept; the last group is simply shorter, and the length still determines the byte count uniquely (2, 4, 5, 7 or 8 characters per final block). Uppercase stays rejected so Readable Text cannot be mistaken for Standard Text during detection. Check symbols were rejected: they add a mod-37 character that FWID's fixed lengths and `detect` do not need. Hyphens stay at every 8 characters, not Crockford's customary 4, to keep the existing grouping rule and to keep the 8-character block boundary visible.
+
 ## Things that are easy to get wrong
 
-- Base32Hex padding is `Z`, not `=`, and the Readable form lowercases the whole text including the padding (`z`).
-- The Readable parser must reject any uppercase letter and any group that is not 8 characters, including a trailing hyphen.
+- Base32Hex padding is `Z`, not `=`. Readable Text has no padding at all (`z` is a real digit, 31, in Crockford's alphabet), so its last group may be shorter than 8.
+- The Readable parser must reject any uppercase letter and any group other than the last that is not 8 characters, including a trailing hyphen. Its last group must have 1 to 8 characters.
+- Crockford's alphabet skips `i`, `l`, `o`, `u`; the decoder maps `i`/`l` to `1` and `o` to `0` but rejects `u`.
 - `inspect` prints a blank line between entries by input index, so a failed entry still counts toward separating the next one.
 - `0` is not a valid Base62 length for any non-empty input; one-character Base62 text must be rejected.

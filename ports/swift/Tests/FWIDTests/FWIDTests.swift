@@ -52,6 +52,15 @@ func at(_ unixMS: Int64) -> Date { Date(timeIntervalSince1970: Double(unixMS) / 
 }
 
 // RFC 4648 section 10, with '=' replaced by 'Z'.
+@Test func base32CrockfordUnpaddedWithAliases() throws {
+    #expect(Base32Crockford.encode([0xff, 0xff, 0xff, 0xff]) == "ZZZZZZR")
+    #expect(try Base32Crockford.decode("zzzzzzr") == [0xff, 0xff, 0xff, 0xff])
+    #expect(try Base32Crockford.decode("OILOILO") == Base32Crockford.decode("0110110"))
+    for text in ["U0000000", "000000", "ZZZZZZZ"] {
+        #expect(throws: FWIDError.self, "\(text)") { try Base32Crockford.decode(text) }
+    }
+}
+
 @Test func base32HexRFC4648Vectors() throws {
     for (plain, encoded) in [
         ("", ""), ("f", "COZZZZZZ"), ("fo", "CPNGZZZZ"), ("foo", "CPNMUZZZ"),

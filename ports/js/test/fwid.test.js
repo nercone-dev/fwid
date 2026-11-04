@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-import { Base32Hex, Base62, FWID, FWIDError, FWIDFormat, ISO8601 } from "../src/index.js";
+import { Base32Crockford, Base32Hex, Base62, FWID, FWIDError, FWIDFormat, ISO8601 } from "../src/index.js";
 import { CLI } from "../src/cli.js";
 
 const rows = (name) =>
@@ -47,6 +47,16 @@ test("invalid texts are rejected", () => {
 });
 
 // RFC 4648 section 10, with '=' replaced by 'Z'.
+test("Base32Crockford encodes unpadded uppercase and decodes aliases", () => {
+  const bytes = Uint8Array.from([0xff, 0xff, 0xff, 0xff]);
+  assert.equal(Base32Crockford.encode(bytes), "ZZZZZZR");
+  assert.deepEqual(Base32Crockford.decode("zzzzzzr"), bytes);
+  assert.deepEqual(Base32Crockford.decode("OILOILO"), Base32Crockford.decode("0110110"));
+  for (const text of ["U0000000", "000000", "ZZZZZZZ"]) {
+    assert.throws(() => Base32Crockford.decode(text), FWIDError, text);
+  }
+});
+
 test("Base32Hex RFC 4648 vectors", () => {
   for (const [plain, encoded] of [
     ["", ""], ["f", "COZZZZZZ"], ["fo", "CPNGZZZZ"], ["foo", "CPNMUZZZ"],

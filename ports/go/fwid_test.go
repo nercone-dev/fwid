@@ -11,6 +11,7 @@ import (
 	"time"
 
 	fwid "github.com/nercone-dev/fwid/ports/go"
+	"github.com/nercone-dev/fwid/ports/go/base32crockford"
 	"github.com/nercone-dev/fwid/ports/go/base32hex"
 	"github.com/nercone-dev/fwid/ports/go/base62"
 	"github.com/nercone-dev/fwid/ports/go/iso8601"
@@ -81,6 +82,25 @@ func TestInvalidTextsAreRejected(t *testing.T) {
 }
 
 // RFC 4648 section 10, with '=' replaced by 'Z'.
+func TestBase32CrockfordUnpaddedWithAliases(t *testing.T) {
+	if got := base32crockford.Encode([]byte{0xff, 0xff, 0xff, 0xff}); got != "ZZZZZZR" {
+		t.Errorf("Encode = %q", got)
+	}
+	if got, err := base32crockford.Decode("zzzzzzr"); err != nil || string(got) != "\xff\xff\xff\xff" {
+		t.Errorf("Decode = %x, %v", got, err)
+	}
+	a, _ := base32crockford.Decode("OILOILO")
+	b, _ := base32crockford.Decode("0110110")
+	if string(a) != string(b) {
+		t.Errorf("aliases differ: %x %x", a, b)
+	}
+	for _, text := range []string{"U0000000", "000000", "ZZZZZZZ"} {
+		if _, err := base32crockford.Decode(text); err == nil {
+			t.Errorf("accepted %q", text)
+		}
+	}
+}
+
 func TestBase32HexRFC4648Vectors(t *testing.T) {
 	for _, c := range [][2]string{
 		{"", ""}, {"f", "COZZZZZZ"}, {"fo", "CPNGZZZZ"}, {"foo", "CPNMUZZZ"},

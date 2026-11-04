@@ -1,3 +1,4 @@
+export { Base32Crockford } from "./base32crockford.js";
 export { Base32Hex } from "./base32hex.js";
 export { Base62 } from "./base62.js";
 export { FWIDError } from "./errors.js";

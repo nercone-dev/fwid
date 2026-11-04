@@ -1,5 +1,4 @@
 # Texts that every FWID text parser must reject. One per line; blank lines and lines starting with # are ignored.
-0000000
 00000000
 0000001Z
 0000000Z00000000
@@ -8,3 +7,6 @@
 0000000z-
 ABCDEFGH
 -0000000z
+0000000u-0000000u
+0000000z-0000000z-0
+0000000Z-0000000Z

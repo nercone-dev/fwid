@@ -43,10 +43,13 @@ However, "Z" is used instead of "=" as the padding character. This allows it to 
 
 ### Readable Text
 
-Based on the Standard Text format, with the following modifications for human readability:
+Uses Crockford's Base32 as the character encoding, with the following rules for human readability:
 
-- Lowercase the character set (`0-9, A-V` → `0-9, a-v`)
-- Insert hyphens (`-`) every 8 characters
+- The character set is Crockford's lowercase alphabet (`0-9, a-z` excluding `i`, `l`, `o`, `u`), which avoids look-alike characters
+- There is no padding. The last group is shorter if the data does not fill it
+- Hyphens (`-`) are inserted every 8 characters
+- When parsing, `i` and `l` are read as `1`, and `o` is read as `0`. Uppercase letters are rejected so that the text is not confused with Standard Text
+- The check symbol of Crockford's Base32 is not used
 
 ### Compact Text
 
@@ -63,6 +66,7 @@ Also, it cannot be used in case-insensitive environments.
 
 - There is no ordering guarantee within the same timestamp. That is, if multiple IDs are generated within the same millisecond, their order is random. If ordering within the same millisecond is required, the leading part of the random portion would need to be replaced with a sequence number, but the specification for that is not included in the FWID specification itself.
 - The epoch is fixed at 2001-01-01 00:00:00 UTC, and unlike TSID or Snowflake-style schemes, the lifetime cannot be extended by changing the epoch. Instead, the bit width must be increased.
+- IDs of different bit widths cannot be sorted chronologically against each other. If IDs of different bit widths are mixed, decode them first and compare the extracted timestamps.
 
 ## Collision Probability
 IDs with different timestamps will never collide. The following figures represent the worst-case scenario (where all IDs are generated within the same millisecond). Values are approximated with the birthday bound, n ≈ √(2·2^r·p) (50%: n ≈ 1.1774·√2^r), where r is the random part bit width.

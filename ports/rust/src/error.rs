@@ -23,6 +23,10 @@ pub enum Error {
     Allocation,
     /// The system random number generator failed.
     Random,
+    /// Base32Crockford length matches no byte length.
+    Base32CrockfordLength,
+    /// Base32Crockford trailing bits are not zero.
+    Base32CrockfordTrailingBits,
     /// Base32Hex length is not a multiple of 8.
     Base32HexLength,
     /// Base32Hex padding appears in a block other than the last.
@@ -39,7 +43,7 @@ pub enum Error {
     Character(char),
     /// Readable Text contains uppercase characters.
     ReadableCase,
-    /// Readable Text groups are not 8 characters long.
+    /// Readable Text groups are not 8 characters long (the last may be shorter).
     ReadableGroups,
 }
 
@@ -61,6 +65,8 @@ impl fmt::Display for Error {
             Error::NotTextFormat => f.write_str("Format is not Text-based Format"),
             Error::Allocation => f.write_str("size is too large"),
             Error::Random => f.write_str("random number generator failed"),
+            Error::Base32CrockfordLength => f.write_str("Invalid Base32Crockford length"),
+            Error::Base32CrockfordTrailingBits => f.write_str("Non-zero trailing bits"),
             Error::Base32HexLength => f.write_str("Base32Hex length must be a multiple of 8"),
             Error::Base32HexPaddingPosition => {
                 f.write_str("Padding is only allowed in the last block")
@@ -72,7 +78,7 @@ impl fmt::Display for Error {
             Error::Character(c) => write!(f, "Invalid character: {c:?}"),
             Error::ReadableCase => f.write_str("Readable Text must be lowercase"),
             Error::ReadableGroups => {
-                f.write_str("Readable Text must be split into groups of 8 characters")
+                f.write_str("Readable Text must be split into groups of 8 characters (the last may be shorter)")
             }
         }
     }

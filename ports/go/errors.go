@@ -20,8 +20,8 @@ var (
 	ErrNotTextFormat = errors.New("Format is not Text-based Format")
 	// ErrReadableCase reports uppercase characters in Readable Text.
 	ErrReadableCase = errors.New("Readable Text must be lowercase")
-	// ErrReadableGroups reports Readable Text groups that are not 8 characters long.
-	ErrReadableGroups = errors.New("Readable Text must be split into groups of 8 characters")
+	// ErrReadableGroups reports Readable Text groups that are not 8 characters long (the last may be shorter).
+	ErrReadableGroups = errors.New("Readable Text must be split into groups of 8 characters (the last may be shorter)")
 )
 
 // TimestampTooLargeError reports a timestamp that does not fit in the requested size.

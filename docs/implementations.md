@@ -45,7 +45,7 @@ Raw bytes sort in time order for identifiers of equal bit length. Each library e
 
 ## Tests
 
-Shared test vectors live in `testdata/`. `vectors.tsv` holds raw bytes with their expected Standard, Readable and Compact texts and timestamp; `invalid.tsv` holds texts every parser must reject. The vectors were produced with the Python standard library's `base64.b32hexencode` and plain integer arithmetic, not with any FWID implementation.
+Shared test vectors live in `testdata/`. `vectors.tsv` holds raw bytes with their expected Standard, Readable and Compact texts and timestamp; `invalid.tsv` holds texts every parser must reject. The vectors were produced with plain integer arithmetic and the Python standard library's `base64.b32hexencode` (Standard) and an independent Crockford alphabet table (Readable), not with any FWID implementation.
 
 ```
 cd ports/rust  && cargo test

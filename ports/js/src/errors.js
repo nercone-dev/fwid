@@ -30,6 +30,12 @@ export class FWIDError extends Error {
   static notTextFormat(name) {
     return new FWIDError("notTextFormat", `Format '${name}' is not Text-based Format`);
   }
+  static base32CrockfordLength() {
+    return new FWIDError("base32CrockfordLength", "Invalid Base32Crockford length");
+  }
+  static base32CrockfordTrailingBits() {
+    return new FWIDError("base32CrockfordTrailingBits", "Non-zero trailing bits");
+  }
   static base32HexLength() {
     return new FWIDError("base32HexLength", "Base32Hex length must be a multiple of 8");
   }
@@ -55,7 +61,7 @@ export class FWIDError extends Error {
     return new FWIDError("readableCase", "Readable Text must be lowercase");
   }
   static readableGroups() {
-    return new FWIDError("readableGroups", "Readable Text must be split into groups of 8 characters");
+    return new FWIDError("readableGroups", "Readable Text must be split into groups of 8 characters (the last may be shorter)");
   }
   static type(message) {
     return new FWIDError("type", message);

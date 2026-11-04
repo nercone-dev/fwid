@@ -16,6 +16,10 @@ public enum FWIDError: Error, Equatable, CustomStringConvertible {
     case unknownFormat
     /// The requested format is not a text format.
     case notTextFormat
+    /// Base32Crockford length matches no byte length.
+    case base32CrockfordLength
+    /// Base32Crockford trailing bits are not zero.
+    case base32CrockfordTrailingBits
     /// Base32Hex length is not a multiple of 8.
     case base32HexLength
     /// Base32Hex padding appears in a block other than the last.
@@ -32,7 +36,7 @@ public enum FWIDError: Error, Equatable, CustomStringConvertible {
     case character(Character)
     /// Readable Text contains uppercase characters.
     case readableCase
-    /// Readable Text groups are not 8 characters long.
+    /// Readable Text groups are not 8 characters long (the last may be shorter).
     case readableGroups
 
     public var description: String {
@@ -47,6 +51,8 @@ public enum FWIDError: Error, Equatable, CustomStringConvertible {
         case .invalidDatetime: return "invalid ISO 8601 datetime"
         case .unknownFormat: return "Unknown Format"
         case .notTextFormat: return "Format is not Text-based Format"
+        case .base32CrockfordLength: return "Invalid Base32Crockford length"
+        case .base32CrockfordTrailingBits: return "Non-zero trailing bits"
         case .base32HexLength: return "Base32Hex length must be a multiple of 8"
         case .base32HexPaddingPosition: return "Padding is only allowed in the last block"
         case .base32HexPaddingLength: return "Invalid padding length"
@@ -55,7 +61,7 @@ public enum FWIDError: Error, Equatable, CustomStringConvertible {
         case .base62Range: return "Value out of range"
         case let .character(c): return "Invalid character: \(String(reflecting: c))"
         case .readableCase: return "Readable Text must be lowercase"
-        case .readableGroups: return "Readable Text must be split into groups of 8 characters"
+        case .readableGroups: return "Readable Text must be split into groups of 8 characters (the last may be shorter)"
         }
     }
 }

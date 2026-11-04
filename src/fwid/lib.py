@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Optional, Union
 from datetime import datetime, timedelta, timezone
 
-from .helpers import Base32Hex, Base62
+from .helpers import Base32Crockford, Base32Hex, Base62
 
 class FWIDFormat(Enum):
     UNFORMATTED = "Unformatted"
@@ -86,9 +86,9 @@ class FWID:
         if text != text.lower():
             raise ValueError("Readable Text must be lowercase")
         groups = text.split("-")
-        if any(len(group) != 8 for group in groups):
-            raise ValueError("Readable Text must be split into groups of 8 characters")
-        return FWID(Base32Hex.decode("".join(groups).upper()))
+        if any(len(group) != 8 for group in groups[:-1]) or not 1 <= len(groups[-1]) <= 8:
+            raise ValueError("Readable Text must be split into groups of 8 characters (the last may be shorter)")
+        return FWID(Base32Crockford.decode("".join(groups)))
 
     @staticmethod
     def from_compact_text(text: str) -> "FWID":
@@ -143,7 +143,7 @@ class FWID:
 
     @property
     def readable_text(self) -> str:
-        standard = self.standard_text.lower()
+        standard = Base32Crockford.encode(self.raw).lower()
         return "-".join(standard[i:i + 8] for i in range(0, len(standard), 8))
 
     @property

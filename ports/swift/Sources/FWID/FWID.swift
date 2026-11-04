@@ -56,11 +56,13 @@ public struct FWID: Hashable, Comparable, CustomStringConvertible, Sendable {
         }
         var joined = [UInt8]()
         joined.reserveCapacity(text.utf8.count)
-        for group in text.utf8.split(separator: UInt8(ascii: "-"), omittingEmptySubsequences: false) {
-            guard group.count == 8 else { throw FWIDError.readableGroups }
-            joined.append(contentsOf: group.map { $0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "z") ? $0 - 32 : $0 })
+        let groups = text.utf8.split(separator: UInt8(ascii: "-"), omittingEmptySubsequences: false)
+        for (i, group) in groups.enumerated() {
+            let valid = i == groups.count - 1 ? (1...8).contains(group.count) : group.count == 8
+            guard valid else { throw FWIDError.readableGroups }
+            joined.append(contentsOf: group)
         }
-        return try fromStandardText(String(decoding: joined, as: UTF8.self))
+        return try FWID(bytes: Base32Crockford.decode(String(decoding: joined, as: UTF8.self)))
     }
 
     public static func fromCompactText(_ text: String) throws -> FWID {
@@ -155,12 +157,12 @@ public struct FWID: Hashable, Comparable, CustomStringConvertible, Sendable {
     public var standardText: String { Base32Hex.encode(raw) }
 
     public var readableText: String {
-        let standard = Array(standardText.lowercased().utf8)
+        let standard = Array(Base32Crockford.encode(raw).lowercased().utf8)
         var out = [UInt8]()
         out.reserveCapacity(standard.count + standard.count / 8)
         for start in stride(from: 0, to: standard.count, by: 8) {
             if start > 0 { out.append(UInt8(ascii: "-")) }
-            out.append(contentsOf: standard[start..<start + 8])
+            out.append(contentsOf: standard[start..<min(start + 8, standard.count)])
         }
         return String(decoding: out, as: UTF8.self)
     }

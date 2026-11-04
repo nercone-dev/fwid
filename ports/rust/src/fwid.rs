@@ -2,6 +2,7 @@ use std::fmt;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use crate::base32crockford::Base32Crockford;
 use crate::base32hex::Base32Hex;
 use crate::base62::Base62;
 use crate::error::Error;
@@ -64,13 +65,19 @@ impl FWID {
             return Err(Error::ReadableCase);
         }
         let mut joined = String::with_capacity(text.len());
-        for group in text.split('-') {
-            if group.len() != 8 {
+        let mut groups = text.split('-').peekable();
+        while let Some(group) = groups.next() {
+            let valid = if groups.peek().is_some() {
+                group.len() == 8
+            } else {
+                (1..=8).contains(&group.len())
+            };
+            if !valid {
                 return Err(Error::ReadableGroups);
             }
-            joined.push_str(&group.to_ascii_uppercase());
+            joined.push_str(group);
         }
-        Self::from_bytes(Base32Hex::decode(&joined)?)
+        Self::from_bytes(Base32Crockford::decode(&joined)?)
     }
 
     pub fn from_compact_text(text: &str) -> Result<FWID, Error> {
@@ -202,7 +209,7 @@ impl FWID {
     }
 
     pub fn readable_text(&self) -> String {
-        let standard = self.standard_text().to_ascii_lowercase();
+        let standard = Base32Crockford::encode(&self.raw).to_ascii_lowercase();
         let mut out = String::with_capacity(standard.len() + standard.len() / 8);
         for (i, chunk) in standard.as_bytes().chunks(8).enumerate() {
             if i > 0 {

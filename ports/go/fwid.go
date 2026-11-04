@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nercone-dev/fwid/ports/go/base32crockford"
 	"github.com/nercone-dev/fwid/ports/go/base32hex"
 	"github.com/nercone-dev/fwid/ports/go/base62"
 )
@@ -82,12 +83,17 @@ func FromReadableText(text string) (FWID, error) {
 		return FWID{}, ErrReadableCase
 	}
 	groups := strings.Split(text, "-")
-	for _, group := range groups {
-		if len(group) != 8 {
+	for i, group := range groups {
+		last := i == len(groups)-1
+		if (!last && len(group) != 8) || (last && (len(group) < 1 || len(group) > 8)) {
 			return FWID{}, ErrReadableGroups
 		}
 	}
-	return FromStandardText(strings.ToUpper(strings.Join(groups, "")))
+	raw, err := base32crockford.Decode(strings.Join(groups, ""))
+	if err != nil {
+		return FWID{}, err
+	}
+	return FromBytes(raw)
 }
 
 func FromCompactText(text string) (FWID, error) {
@@ -230,14 +236,14 @@ func (f FWID) Text(format Format) (string, error) {
 func (f FWID) StandardText() string { return base32hex.Encode([]byte(f.raw)) }
 
 func (f FWID) ReadableText() string {
-	standard := strings.ToLower(f.StandardText())
+	standard := strings.ToLower(base32crockford.Encode([]byte(f.raw)))
 	var out strings.Builder
 	out.Grow(len(standard) + len(standard)/8)
 	for i := 0; i < len(standard); i += 8 {
 		if i > 0 {
 			out.WriteByte('-')
 		}
-		out.WriteString(standard[i : i+8])
+		out.WriteString(standard[i:min(i+8, len(standard))])
 	}
 	return out.String()
 }

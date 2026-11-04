@@ -1,3 +1,4 @@
+import { Base32Crockford } from "./base32crockford.js";
 import { Base32Hex } from "./base32hex.js";
 import { Base62 } from "./base62.js";
 import { FWIDError } from "./errors.js";
@@ -59,8 +60,11 @@ export class FWID {
   static fromReadableText(text) {
     if (text !== text.toLowerCase()) throw FWIDError.readableCase();
     const groups = text.split("-");
-    if (groups.some((group) => group.length !== 8)) throw FWIDError.readableGroups();
-    return new FWID(Base32Hex.decode(groups.join("").toUpperCase()));
+    const last = groups[groups.length - 1].length;
+    if (groups.slice(0, -1).some((group) => group.length !== 8) || last < 1 || last > 8) {
+      throw FWIDError.readableGroups();
+    }
+    return new FWID(Base32Crockford.decode(groups.join("")));
   }
 
   static fromCompactText(text) {
@@ -185,7 +189,7 @@ export class FWID {
   }
 
   get readableText() {
-    return this.standardText.toLowerCase().match(/.{8}/g).join("-");
+    return Base32Crockford.encode(this.#raw).toLowerCase().match(/.{1,8}/g).join("-");
   }
 
   get compactText() {
