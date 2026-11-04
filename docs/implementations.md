@@ -1,6 +1,6 @@
 # Implementations
 
-FWID is implemented in five languages. All of them follow the same specification (see the README), accept the same text formats, and ship the same command line tool.
+FWID is implemented in five languages. All of them follow the same specification (see [SPEC.md](../SPEC.md)), accept the same text formats, and ship the same command line tool.
 
 | Language | Directory | Library | Command |
 |---|---|---|---|
