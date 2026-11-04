@@ -1,0 +1,28 @@
+{
+  "name": "fwid",
+  "version": "0.1.0",
+  "description": "FWID (FourWord Identifier): random identifiers with time-series sortability.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "fwid": "./bin/fwid.js"
+  },
+  "files": [
+    "src",
+    "bin"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nercone-dev/fwid/"
+  }
+}

@@ -79,6 +79,9 @@ Each bit length overflows at the following times:
 | 384 | 96 | 7.9×10²⁵ | ≈2.5×10¹⁸ years from the epoch |
 | 512 | 128 | 3.4×10³⁶ | ≈1.1×10²⁸ years from the epoch |
 
+## Implementations
+Python (this package, in `src/fwid`), Rust, Go, Swift and JavaScript implementations are included, each with the same command line tool. See [docs/implementations.md](docs/implementations.md).
+
 ## License
 The source code and libraries in this repository are freely available under the MIT License.
 
