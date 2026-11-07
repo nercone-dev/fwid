@@ -27,6 +27,8 @@ public enum FWIDFormat: Equatable, Hashable, Sendable {
 public struct FWID: Hashable, Comparable, CustomStringConvertible, Sendable {
     /// The FWID epoch, 2001-01-01 00:00:00 UTC, in Unix milliseconds.
     public static let epochUnixMS: UInt64 = 978_307_200_000
+    /// Largest Unix millisecond count that `ISO8601.format` can print (Int64 microseconds).
+    static let maxFormattableUnixMS: UInt64 = 9_000_000_000_000_000
     public static let bitsAlign = 32
 
     public let raw: [UInt8]
@@ -140,7 +142,8 @@ public struct FWID: Hashable, Comparable, CustomStringConvertible, Sendable {
     public var timestamp: Date {
         get throws {
             let (unixMS, overflow) = try timestampMS.addingReportingOverflow(FWID.epochUnixMS)
-            guard !overflow else { throw FWIDError.timeOutOfRange }
+            // ISO8601.format works in Int64 microseconds; reject what it cannot represent.
+            guard !overflow, unixMS <= FWID.maxFormattableUnixMS else { throw FWIDError.timeOutOfRange }
             return Date(timeIntervalSince1970: Double(unixMS) / 1000)
         }
     }

@@ -6,7 +6,9 @@ class Base32Crockford:
     """
 
     ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
-    ALIASES = {"I": "1", "L": "1", "O": "0"}
+    # ASCII only: str.upper() maps some non-ASCII characters (e.g. U+017F) onto ASCII letters.
+    VALUES = dict(zip(ALPHABET + ALPHABET.lower(), list(range(32)) * 2))
+    VALUES.update({"I": 1, "L": 1, "O": 0, "i": 1, "l": 1, "o": 0})
     BYTES_FROM_CHARS = {8: 5, 7: 4, 5: 3, 4: 2, 2: 1, 0: 0}
 
     @classmethod
@@ -22,7 +24,6 @@ class Base32Crockford:
 
     @classmethod
     def decode(cls, text: str) -> bytes:
-        text = text.upper()
         out = bytearray()
         for i in range(0, len(text), 8):
             block = text[i:i + 8]
@@ -31,8 +32,8 @@ class Base32Crockford:
                 raise ValueError("Invalid Base32Crockford length")
             value = 0
             for ch in block:
-                index = cls.ALPHABET.find(cls.ALIASES.get(ch, ch))
-                if index < 0:
+                index = cls.VALUES.get(ch)
+                if index is None:
                     raise ValueError(f"Invalid character: {ch!r}")
                 value = (value << 5) | index
             extra = len(block) * 5 - n * 8

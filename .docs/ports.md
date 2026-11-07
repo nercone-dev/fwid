@@ -64,4 +64,6 @@ Targets Lython (t3tra-dev/lython `main`) and NLython (nercone-forks/lython `merg
 - Crockford's alphabet skips `i`, `l`, `o`, `u`; the decoder maps `i`/`l` to `1` and `o` to `0` but rejects `u`.
 - `inspect` prints a blank line between entries by input index, so a failed entry still counts toward separating the next one.
 - `0` is not a valid Base62 length for any non-empty input; one-character Base62 text must be rejected.
+- Never case-fold Readable Text with the language's `upper()` / `toUpperCase()` before decoding. Unicode case mapping sends non-ASCII characters onto ASCII ones (`ſ` U+017F becomes `S`, `ß` becomes `SS`), so `ſ000000` would be accepted. Python and JavaScript use an ASCII-only symbol table; `testdata/invalid.tsv` has both cases.
+- Converting the timestamp to a native time type or printing it can overflow even when parsing works (Python `datetime` ends at year 9999, Swift formats through `Int64` microseconds). Report an error for that identifier; do not crash, and do not fail the whole `inspect` run.
 - Lython port: `Base32Crockford.symbol_value` upper-cases ASCII letters only. Python's `str.upper()` can change the length of the text for non-ASCII characters (`'ß'.upper()` is `'SS'`), and Lython's may differ from CPython's, so the port does not use it. Non-ASCII characters are rejected as outside the alphabet.

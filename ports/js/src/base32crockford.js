@@ -7,7 +7,11 @@ import { FWIDError } from "./errors.js";
  */
 export class Base32Crockford {
   static ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
-  static ALIASES = { I: "1", L: "1", O: "0" };
+  /** Symbol to value. ASCII only: toUpperCase() maps some non-ASCII characters (e.g. U+017F) onto ASCII letters. */
+  static #VALUES = new Map(
+    [..."0123456789ABCDEFGHJKMNPQRSTVWXYZ"].flatMap((c, v) => [[c, v], [c.toLowerCase(), v]])
+      .concat([["I", 1], ["L", 1], ["O", 0], ["i", 1], ["l", 1], ["o", 0]]),
+  );
 
   /** Bytes carried by a block with this many characters. */
   static #bytesFromChars(chars) {
@@ -29,7 +33,6 @@ export class Base32Crockford {
 
   /** @param {string} text @returns {Uint8Array} */
   static decode(text) {
-    text = text.toUpperCase();
     const out = new Uint8Array(Math.ceil(text.length / 8) * 5);
     let length = 0;
     for (let i = 0; i < text.length; i += 8) {
@@ -38,8 +41,8 @@ export class Base32Crockford {
       if (n === undefined) throw FWIDError.base32CrockfordLength();
       let value = 0;
       for (const ch of block) {
-        const index = Base32Crockford.ALPHABET.indexOf(Base32Crockford.ALIASES[ch] ?? ch);
-        if (index < 0) throw FWIDError.character(ch);
+        const index = Base32Crockford.#VALUES.get(ch);
+        if (index === undefined) throw FWIDError.character(ch);
         value = value * 32 + index;
       }
       const extra = block.length * 5 - n * 8;

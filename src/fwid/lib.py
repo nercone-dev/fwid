@@ -35,6 +35,7 @@ class FWIDFormat(Enum):
 class FWID:
     EPOCH = datetime(2001, 1, 1, tzinfo=timezone.utc)
     BITS_ALIGN = 32
+    __slots__ = ("raw",)
 
     def __init__(self, arg: Optional[Union[bytes, str, int]] = None, dt: Optional[datetime] = None):
         if arg is None:
@@ -67,15 +68,12 @@ class FWID:
 
     @staticmethod
     def from_text(text: str) -> "FWID":
-        detected_format = FWIDFormat.detect(text)
-        if detected_format == FWIDFormat.STANDARD_TEXT:
-            return FWID.from_standard_text(text)
-        elif detected_format == FWIDFormat.READABLE_TEXT:
-            return FWID.from_readable_text(text)
-        elif detected_format == FWIDFormat.COMPACT_TEXT:
-            return FWID.from_compact_text(text)
-        else:
-            raise ValueError("Unknown Format")
+        for parse in (FWID.from_standard_text, FWID.from_readable_text, FWID.from_compact_text):
+            try:
+                return parse(text)
+            except ValueError:
+                continue
+        raise ValueError("Unknown Format")
 
     @staticmethod
     def from_standard_text(text: str) -> "FWID":
@@ -95,14 +93,17 @@ class FWID:
         return FWID(Base62.decode(text))
 
     @staticmethod
+    def min_bits_for_ms(ms: int) -> int:
+        return max(1, (ms.bit_length() + 7) // 8) * FWID.BITS_ALIGN
+
+    @staticmethod
     def min_bits(dt: Optional[datetime] = None) -> int:
-        timestamp_bytes = max(1, (FWID.epoch_ms(dt).bit_length() + 7) // 8)
-        return timestamp_bytes * 8 * 4
+        return FWID.min_bits_for_ms(FWID.epoch_ms(dt))
 
     @staticmethod
     def generate(bits: Optional[int] = None, dt: Optional[datetime] = None) -> bytes:
         ms = FWID.epoch_ms(dt)
-        required = max(1, (ms.bit_length() + 7) // 8) * 32
+        required = FWID.min_bits_for_ms(ms)
         if bits is None:
             bits = required
         FWID.check_bits(bits)
@@ -123,19 +124,24 @@ class FWID:
         return (self.bits // 4) * 3
 
     @property
+    def timestamp_ms(self) -> int:
+        return int.from_bytes(self.raw[:self.bits_timestamp // 8], "big")
+
+    @property
     def timestamp(self) -> datetime:
-        ms = int.from_bytes(self.raw[:self.bits_timestamp // 8], "big")
-        return FWID.EPOCH + timedelta(milliseconds=ms)
+        try:
+            return FWID.EPOCH + timedelta(milliseconds=self.timestamp_ms)
+        except OverflowError:
+            raise ValueError("timestamp is out of the range of datetime") from None
 
     def text(self, format: FWIDFormat = FWIDFormat.STANDARD_TEXT) -> str:
         if format == FWIDFormat.STANDARD_TEXT:
             return self.standard_text
-        elif format == FWIDFormat.READABLE_TEXT:
+        if format == FWIDFormat.READABLE_TEXT:
             return self.readable_text
-        elif format == FWIDFormat.COMPACT_TEXT:
+        if format == FWIDFormat.COMPACT_TEXT:
             return self.compact_text
-        else:
-            raise ValueError(f"Format '{format.value}' is not Text-based Format")
+        raise ValueError(f"Format '{format.value}' is not Text-based Format")
 
     @property
     def standard_text(self) -> str:
