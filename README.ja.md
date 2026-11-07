@@ -29,7 +29,7 @@ FWIDは、データベースの主キーなどの用途を想定して設計さ�
 また、英単語の "Forward" にちなんだ言葉遊びでもあります。
 
 ## 実装
-Python(`src/fwid`)に加え、Rust・Go・Swift・JavaScriptの実装を同梱しています。いずれも同じコマンドラインツールを備えています。詳しくは[docs/implementations.md](docs/implementations.md)(英語)を参照してください。
+Python(`src/fwid`)に加え、Rust・Go・Swift・JavaScript・Lythonコンパイラ向けの実装を同梱しています。いずれも同じコマンドラインツールを備えています。詳しくは[docs/implementations.md](docs/implementations.md)(英語)を参照してください。
 
 ## ライセンス
 このリポジトリのソースコードとライブラリは、MITライセンスのもとで自由に利用できます。

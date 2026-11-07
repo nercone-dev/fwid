@@ -1,0 +1,9 @@
+[project]
+name = "fwid"
+version = "0.1.0"
+description = "FWID (FourWord Identifier) for Lython"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+fwid = "fwid.cli:CLI.main"

@@ -29,7 +29,7 @@ The name "Four" comes from the fact that the timestamp occupies 1/4 of the bit l
 It is also a wordplay on the word "Forward".
 
 ## Implementations
-Python (this package, in `src/fwid`), Rust, Go, Swift and JavaScript implementations are included, each with the same command line tool. See [docs/implementations.md](docs/implementations.md).
+Implementations for Python (this package, in `src/fwid`), Rust, Go, Swift, JavaScript and Lython Compiler are included, each with the same command line tool. See [docs/implementations.md](docs/implementations.md).
 
 ## License
 The source code and libraries in this repository are freely available under the MIT License.
